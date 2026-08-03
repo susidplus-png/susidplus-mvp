@@ -1,0 +1,255 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id String @id @default(uuid())
+
+  phone String  @unique
+  email String? @unique
+  name  String?
+
+  susidNumber String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile Profile?
+
+  connections NeighborConnection[] @relation("UserConnections")
+  neighbors   NeighborConnection[] @relation("NeighborConnections")
+
+  createdRequests Request[] @relation("CreatedRequests")
+
+  helpedInteractions Interaction[] @relation("HelpedInteractions")
+
+  sidTransactions SIDTransaction[]
+
+  reviewsGiven    Review[] @relation("ReviewsGiven")
+  reviewsReceived Review[] @relation("ReviewsReceived")
+
+  messages Message[]
+
+  location Location?
+
+  verification UserVerification?
+
+  trustEvents TrustEvent[]
+
+  auditLogs AuditLog[]
+}
+
+model Profile {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  firstName  String
+  lastName   String?
+  city       String?
+  district   String?
+  bio        String?
+  trustScore Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model NeighborConnection {
+  id String @id @default(uuid())
+
+  userId     String
+  neighborId String
+
+  status String @default("PENDING")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User @relation("UserConnections", fields: [userId], references: [id])
+  neighbor User @relation("NeighborConnections", fields: [neighborId], references: [id])
+
+  @@unique([userId, neighborId])
+}
+
+model Request {
+  id String @id @default(uuid())
+
+  creatorId String
+
+  title       String
+  description String?
+
+  status String @default("OPEN")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  creator User @relation("CreatedRequests", fields: [creatorId], references: [id])
+
+  categoryId   String?
+  category     Category?     @relation(fields: [categoryId], references: [id])
+  interactions Interaction[]
+
+  attachments Attachment[]
+}
+
+model Interaction {
+  id String @id @default(uuid())
+
+  requestId String
+  helperId  String
+
+  status String @default("STARTED")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  request Request @relation(fields: [requestId], references: [id])
+  helper  User    @relation("HelpedInteractions", fields: [helperId], references: [id])
+
+  reviews Review[]
+
+  sidTransactions SIDTransaction[]
+}
+
+model SIDTransaction {
+  id String @id @default(uuid())
+
+  userId        String
+  interactionId String?
+
+  amount Int
+  reason String
+  type   String
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  interaction Interaction? @relation(fields: [interactionId], references: [id])
+}
+
+model Review {
+  id String @id @default(uuid())
+
+  authorId      String
+  receiverId    String
+  interactionId String
+
+  rating  Int
+  comment String?
+
+  createdAt DateTime @default(now())
+
+  author   User @relation("ReviewsGiven", fields: [authorId], references: [id])
+  receiver User @relation("ReviewsReceived", fields: [receiverId], references: [id])
+
+  interaction Interaction @relation(fields: [interactionId], references: [id])
+
+  @@unique([interactionId, authorId])
+}
+
+model Category {
+  id String @id @default(uuid())
+
+  name      String   @unique
+  icon      String?
+  createdAt DateTime @default(now())
+
+  requests Request[]
+}
+
+model Attachment {
+  id String @id @default(uuid())
+
+  requestId String
+
+  url  String
+  type String
+
+  createdAt DateTime @default(now())
+
+  request Request @relation(fields: [requestId], references: [id])
+}
+
+model Message {
+  id String @id @default(uuid())
+
+  senderId String
+
+  text String
+
+  createdAt DateTime @default(now())
+
+  sender User @relation(fields: [senderId], references: [id])
+}
+
+model Location {
+  id String @id @default(uuid())
+
+  userId String @unique
+
+  city     String
+  district String
+  street   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model UserVerification {
+  id String @id @default(uuid())
+
+  userId String @unique
+
+  status String @default("PENDING")
+
+  level Int @default(0)
+
+  note String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model TrustEvent {
+  id String @id @default(uuid())
+
+  userId String
+
+  points Int
+
+  reason String
+
+  type String
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id String @id @default(uuid())
+
+  userId String?
+
+  action String
+
+  entity String
+
+  entityId String?
+
+  details String?
+
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+}
