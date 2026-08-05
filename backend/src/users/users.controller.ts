@@ -14,6 +14,15 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+
+  @Get(':id')
+  findOne(
+    @Param('id') id: string,
+  ) {
+    return this.usersService.findOne(id);
+  }
+
+
   @Get('susid/:number')
   findBySusidNumber(
     @Param('number') number: string,
@@ -21,12 +30,14 @@ export class UsersController {
     return this.usersService.findBySusidNumber(number);
   }
 
+
   @Post()
   create(
     @Body() createUserDto: CreateUserDto,
   ) {
     return this.usersService.create(createUserDto);
   }
+
 
   @Patch(':id/profile')
   updateProfile(

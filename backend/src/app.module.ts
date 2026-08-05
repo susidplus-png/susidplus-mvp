@@ -9,6 +9,7 @@ import { RequestsModule } from './requests/requests.module';
 import { InteractionsModule } from './interactions/interactions.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { SidTransactionsModule } from './sid-transactions/sid-transactions.module';
+import { ServicesModule } from './services/services.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { SidTransactionsModule } from './sid-transactions/sid-transactions.modul
     InteractionsModule,
     ReviewsModule,
     SidTransactionsModule,
+    ServicesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

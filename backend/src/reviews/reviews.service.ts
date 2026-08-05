@@ -37,6 +37,18 @@ export class ReviewsService {
         },
       });
 
+      // Оновлення довіри отримувача
+      await this.prisma.profile.update({
+        where: {
+          userId: dto.receiverId,
+        },
+        data: {
+          trustScore: {
+            increment: dto.rating,
+          },
+        },
+      });
+
       return review;
 
     } catch (error) {
