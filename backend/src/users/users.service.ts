@@ -1,277 +1,129 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { SidTransactionsService } from '../sid-transactions/sid-transactions.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private prisma: PrismaService,
-    private sidTransactionsService: SidTransactionsService,
   ) {}
 
-
   async findAll() {
-    const users =
-      await this.prisma.user.findMany({
-        include: {
-          profile: true,
-          location: true,
-          services: {
-            where: {
-              isActive: true,
-            },
-          },
-        },
-      });
-
-
-    return Promise.all(
-      users.map(async (user) => ({
-        ...user,
-        sidBalance:
-          await this.sidTransactionsService.getBalance(
-            user.id,
-          ),
-      })),
-    );
-  }
-
-
-
-  async findOne(id: string) {
-    const user =
-      await this.prisma.user.findUnique({
-        where: {
-          id,
-        },
-
-        include: {
-          profile: true,
-          location: true,
-
-
-          // Послуги сусіда
-          services: {
-            where: {
-              isActive: true,
-            },
-
-            orderBy: {
-              createdAt: 'desc',
-            },
-          },
-
-
-          // Отримані відгуки
-          reviewsReceived: true,
-
-
-          // Дані, де він залишав відгуки
-          reviewsGiven: true,
-
-
-          // Роботи виконані сусідом
-          helpedInteractions: {
-            include: {
-              request: true,
-              sidTransactions: true,
-              reviews: true,
-            },
-
-            orderBy: {
-              createdAt: 'desc',
-            },
-          },
-
-
-          // Запити, які створив сусід
-          createdRequests: {
-            include: {
-              interactions: {
-                include: {
-                  helper: {
-                    include: {
-                      profile: true,
-                    },
-                  },
-                },
-              },
-            },
-
-            orderBy: {
-              createdAt: 'desc',
-            },
-          },
-        },
-      });
-
-
-
-    if (!user) {
-      return null;
-    }
-
-
-
-    return {
-      ...user,
-
-      sidBalance:
-        await this.sidTransactionsService.getBalance(
-          user.id,
-        ),
-    };
-  }
-
-
-
-
-
-  async create(data: {
-    phone: string;
-    firstName: string;
-  }) {
-
-    const count =
-      await this.prisma.user.count();
-
-
-    const susidNumber =
-      `S+${String(count + 1).padStart(6, '0')}`;
-
-
-
-    return this.prisma.user.create({
-
-      data: {
-
-        phone: data.phone,
-
-        susidNumber,
-
-
-        profile: {
-
-          create: {
-
-            firstName:
-              data.firstName,
-
-          },
-
-        },
-
-      },
-
-
+    return this.prisma.user.findMany({
       include: {
-
         profile: true,
+        location: true,
 
+        services: {
+          include: {
+            category: true,
+          },
+        },
+
+        reviewsReceived: true,
+        reviewsGiven: true,
+
+        helpedInteractions: {
+          include: {
+            request: true,
+            sidTransactions: true,
+            reviews: true,
+          },
+        },
+
+        createdRequests: true,
+
+        sidTransactions: true,
       },
-
     });
   }
 
 
+  async findOne(id: string) {
+    return this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+
+      include: {
+        profile: true,
+        location: true,
+
+        services: {
+          include: {
+            category: true,
+          },
+        },
+
+        reviewsReceived: true,
+        reviewsGiven: true,
+
+        helpedInteractions: {
+          include: {
+            request: true,
+            sidTransactions: true,
+            reviews: true,
+          },
+        },
+
+        createdRequests: true,
+
+        sidTransactions: true,
+      },
+    });
+  }
 
 
+  async findBySusidNumber(number: string) {
+    return this.prisma.user.findUnique({
+      where: {
+        susidNumber: number,
+      },
+
+      include: {
+        profile: true,
+        location: true,
+
+        services: {
+          include: {
+            category: true,
+          },
+        },
+
+        reviewsReceived: true,
+        reviewsGiven: true,
+
+        helpedInteractions: {
+          include: {
+            request: true,
+            sidTransactions: true,
+            reviews: true,
+          },
+        },
+
+        createdRequests: true,
+
+        sidTransactions: true,
+      },
+    });
+  }
+
+
+  async create(data: any) {
+    return this.prisma.user.create({
+      data,
+    });
+  }
 
 
   async updateProfile(
     userId: string,
-
-    data: {
-      lastName?: string;
-      city?: string;
-      district?: string;
-      bio?: string;
-    },
-
+    data: any,
   ) {
-
     return this.prisma.profile.update({
-
       where: {
-
         userId,
-
       },
-
-
       data,
-
     });
-
   }
-
-
-
-
-
-
-
-  async findBySusidNumber(
-    susidNumber: string,
-  ) {
-
-
-    const user =
-      await this.prisma.user.findUnique({
-
-        where: {
-
-          susidNumber,
-
-        },
-
-
-        include: {
-
-          profile: true,
-
-          location: true,
-
-
-          services: {
-
-            where: {
-
-              isActive: true,
-
-            },
-
-          },
-
-        },
-
-      });
-
-
-
-
-    if (!user) {
-
-      return null;
-
-    }
-
-
-
-
-    return {
-
-      ...user,
-
-
-      sidBalance:
-
-        await this.sidTransactionsService.getBalance(
-          user.id,
-        ),
-
-    };
-
-  }
-
 }

@@ -5,19 +5,18 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 
 import { ServicesService } from './services.service';
 import { CreateServiceDto } from './dto/create-service.dto';
-
+import { SearchServiceDto } from './dto/search-service.dto';
 
 @Controller('services')
 export class ServicesController {
-
   constructor(
     private servicesService: ServicesService,
   ) {}
-
 
   @Post(':userId')
   create(
@@ -30,7 +29,6 @@ export class ServicesController {
     );
   }
 
-
   @Get('user/:userId')
   findByUser(
     @Param('userId') userId: string,
@@ -40,12 +38,14 @@ export class ServicesController {
     );
   }
 
-
   @Get()
-  findAll() {
-    return this.servicesService.findAll();
+  findAll(
+    @Query() search: SearchServiceDto,
+  ) {
+    return this.servicesService.findAll(
+      search,
+    );
   }
-
 
   @Patch(':id/status')
   updateStatus(

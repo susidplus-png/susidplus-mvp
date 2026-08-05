@@ -3,6 +3,8 @@ export class CreateServiceDto {
 
   description?: string;
 
+  serviceType?: 'FREE' | 'PAID' | 'BARTER';
+
   priceFrom?: number;
 
   priceTo?: number;

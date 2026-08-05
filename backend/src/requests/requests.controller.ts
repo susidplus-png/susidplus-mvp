@@ -1,6 +1,14 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+} from '@nestjs/common';
+
 import { RequestsService } from './requests.service';
 import { CreateRequestDto } from './dto/create-request.dto';
+import { SearchRequestDto } from './dto/search-request.dto';
 
 @Controller('requests')
 export class RequestsController {
@@ -19,7 +27,11 @@ export class RequestsController {
   }
 
   @Get()
-  findAll() {
-    return this.requestsService.findAll();
+  findAll(
+    @Query() query: SearchRequestDto,
+  ) {
+    return this.requestsService.findAll(
+      query,
+    );
   }
 }
