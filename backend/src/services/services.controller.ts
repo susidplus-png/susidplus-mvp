@@ -15,7 +15,7 @@ import { SearchServiceDto } from './dto/search-service.dto';
 @Controller('services')
 export class ServicesController {
   constructor(
-    private servicesService: ServicesService,
+    private readonly servicesService: ServicesService,
   ) {}
 
   @Post(':userId')
@@ -29,32 +29,28 @@ export class ServicesController {
     );
   }
 
-  @Get('user/:userId')
-  findByUser(
-    @Param('userId') userId: string,
-  ) {
-    return this.servicesService.findByUser(
-      userId,
-    );
-  }
-
   @Get()
   findAll(
     @Query() search: SearchServiceDto,
   ) {
-    return this.servicesService.findAll(
-      search,
-    );
+    return this.servicesService.findAll(search);
   }
 
-  @Patch(':id/status')
+  @Get('user/:userId')
+  findByUser(
+    @Param('userId') userId: string,
+  ) {
+    return this.servicesService.findByUser(userId);
+  }
+
+  @Patch(':id/status/:isActive')
   updateStatus(
     @Param('id') id: string,
-    @Body('isActive') isActive: boolean,
+    @Param('isActive') isActive: string,
   ) {
     return this.servicesService.updateStatus(
       id,
-      isActive,
+      isActive === 'true',
     );
   }
 }

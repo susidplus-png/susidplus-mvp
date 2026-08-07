@@ -21,6 +21,14 @@ export class ServicesService {
         currency: dto.currency ?? 'UAH',
         categoryId: dto.categoryId,
       },
+      include: {
+        category: true,
+        user: {
+          include: {
+            profile: true,
+          },
+        },
+      },
     });
   }
 
@@ -88,6 +96,14 @@ export class ServicesService {
       },
       data: {
         isActive,
+      },
+      include: {
+        category: true,
+        user: {
+          include: {
+            profile: true,
+          },
+        },
       },
     });
   }

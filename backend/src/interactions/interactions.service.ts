@@ -3,12 +3,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateInteractionDto } from './dto/create-interaction.dto';
 import { CompleteInteractionDto } from './dto/complete-interaction.dto';
 import { SidTransactionsService } from '../sid-transactions/sid-transactions.service';
+import { TrustService } from '../trust/trust.service';
 
 @Injectable()
 export class InteractionsService {
+
   constructor(
     private prisma: PrismaService,
     private sidTransactionsService: SidTransactionsService,
+    private trustService: TrustService,
   ) {}
 
   async create(
@@ -45,16 +48,13 @@ export class InteractionsService {
     return this.prisma.interaction.findMany({
       include: {
         request: true,
-
         helper: {
           include: {
             profile: true,
           },
         },
-
         sidTransactions: true,
       },
-
       orderBy: {
         createdAt: 'desc',
       },
@@ -92,17 +92,19 @@ export class InteractionsService {
 
       await this.sidTransactionsService.create({
         userId: interaction.helperId,
-
         interactionId: interaction.id,
-
         amount: 15,
-
-        reason:
-          'Р”РѕРїРѕРјРѕРіР° СЃСѓСЃС–РґСѓ РІРёРєРѕРЅР°РЅР°',
-
-        type:
-          'HELP_COMPLETED',
+        reason: 'опомога сусіду виконана',
+        type: 'HELP_COMPLETED',
       });
+
+
+      await this.trustService.create(
+        interaction.helperId,
+        10,
+        'опомога сусіду виконана',
+        'HELP_COMPLETED',
+      );
 
     }
 
@@ -111,42 +113,28 @@ export class InteractionsService {
       where: {
         id: interaction.requestId,
       },
-
       data: {
         status: 'COMPLETED',
       },
     });
 
 
-
     return this.prisma.interaction.update({
-
       where: {
         id: dto.interactionId,
       },
-
-
       data: {
         status: 'COMPLETED',
       },
-
-
       include: {
-
         request: true,
-
-
         helper: {
           include: {
             profile: true,
           },
         },
-
-
         sidTransactions: true,
-
       },
-
     });
 
   }

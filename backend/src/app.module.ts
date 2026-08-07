@@ -11,6 +11,8 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { SidTransactionsModule } from './sid-transactions/sid-transactions.module';
 import { ServicesModule } from './services/services.module';
 import { CategoriesModule } from './categories/categories.module';
+import { AuthModule } from './auth/auth.module';
+import { TrustModule } from './trust/trust.module';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { CategoriesModule } from './categories/categories.module';
     SidTransactionsModule,
     ServicesModule,
     CategoriesModule,
+    AuthModule,
+    TrustModule,
   ],
   controllers: [AppController],
   providers: [AppService],
